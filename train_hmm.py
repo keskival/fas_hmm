@@ -31,7 +31,7 @@ def get_n_sequences(n, correct=True, validation=False):
         runs.append(run)
     return runs
 
-for number_of_hidden_states in range(NUMBER_OF_HIDDEN_STATES):
+for number_of_hidden_states in range(1, NUMBER_OF_HIDDEN_STATES):
     model = hmm.MultinomialHMM(number_of_hidden_states)
     correct_runs = get_n_sequences(NUMBER_OF_TRAINING_SEQUENCES)
 
