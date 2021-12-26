@@ -37,7 +37,7 @@ for number_of_hidden_states in range(1, NUMBER_OF_HIDDEN_STATES):
 
     X, lengths = transform(correct_runs)
 
-    model_filename = f"hmm_{NUMBER_OF_HIDDEN_STATES}.pkl"
+    model_filename = f"hmm_{number_of_hidden_states}.pkl"
 
     if os.path.isfile(model_filename):
         with open(model_filename, "rb") as file:
