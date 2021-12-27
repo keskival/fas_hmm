@@ -1,3 +1,4 @@
-simpy
 numpy
 hmmlearn
+sklearn
+matplotlib

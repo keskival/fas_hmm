@@ -4,13 +4,16 @@ import os
 import numpy as np
 from hmmlearn import hmm
 import pickle
+import sklearn
+import matplotlib.pyplot as plt
 
 
 NUMBER_OF_RUNS = 100000
 TRAINING_SET = 90000
-NUMBER_OF_HIDDEN_STATES = 64
-NUMBER_OF_TRAINING_SEQUENCES = 100
-NUMBER_OF_VALIDATION_SEQUENCES = 100
+#NUMBER_OF_HIDDEN_STATES = 64
+NUMBER_OF_HIDDEN_STATES = 32
+NUMBER_OF_TRAINING_SEQUENCES = 1000
+NUMBER_OF_VALIDATION_SEQUENCES = 1000
 
 def transform(sequences):
     lengths = [r.shape[0] for r in sequences]
@@ -30,6 +33,9 @@ def get_n_sequences(n, correct=True, validation=False):
         run = np.load(f"numpy_data/{sequence_source}/{run_index}.npy").reshape([-1, 1])
         runs.append(run)
     return runs
+
+scores = []
+hidden_states = []
 
 for number_of_hidden_states in range(1, NUMBER_OF_HIDDEN_STATES):
     model = hmm.MultinomialHMM(number_of_hidden_states)
@@ -68,4 +74,19 @@ for number_of_hidden_states in range(1, NUMBER_OF_HIDDEN_STATES):
     faulty_log_probs = np.stack(faulty_log_probs)
     correct_log_prob = [np.min(correct_log_probs), np.mean(correct_log_probs), np.max(correct_log_probs)]
     faulty_log_prob = [np.min(faulty_log_probs), np.mean(faulty_log_probs), np.max(faulty_log_probs)]
-    print(f"Number of hidden states: {number_of_hidden_states}, Mean correct log prob: {correct_log_prob}, mean faulty log prob: {faulty_log_prob}")
+
+    log_probabilities_positive_for_positive = correct_log_probs
+    log_probabilities_positive_for_negative = faulty_log_probs
+
+    y_true = np.concatenate([np.ones_like(log_probabilities_positive_for_positive), np.zeros_like(log_probabilities_positive_for_negative)])
+    y_pred = np.concatenate([log_probabilities_positive_for_positive, log_probabilities_positive_for_negative])
+    roc_auc_score = sklearn.metrics.roc_auc_score(y_true, y_pred)
+
+    print(f"Number of hidden states: {number_of_hidden_states}, Correct log prob min,mean,max: {correct_log_prob}, faulty log prob min,mean,max: {faulty_log_prob}, ROC AUC score: {roc_auc_score}")
+    hidden_states.append(number_of_hidden_states)
+    scores.append(roc_auc_score)
+print(f"hidden_states={hidden_states}")
+print(f"scores={scores}")
+
+plt.plot(hidden_states, scores)
+plt.show()
