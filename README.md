@@ -8,8 +8,10 @@ Get the data by following the instructions there to get the directory named `num
 
 Run the evaluation: `./train_hmm.py`
 
-The script will save trained models for further evaluation.
+The script will save trained models for further evaluation. It takes some days to run on a reasonable computer.
 
-This produces outputs to the standard output giving log likelihood minimums, means and maximums for 100 faultless runs in the validation set, and 100 runs with simulated errors, for each number of HMM hidden states from 1 to 64.
+This produces outputs to the standard output giving minimums, means and maximums for some discriminative metrics for 1,000 faultless runs in the validation set, and 1,000 runs with simulated errors, for each number of HMM hidden states from 1 to 64.
 
-If the scored log likelihood ranges overlap, it means that HMM is not able to perfectly discriminate between the correct and failure mode runs.
+KL divergences are computed for the distributions of hidden states for faultless runs and the anomalous runs against training set distribution.
+
+In the end ROC values are graphed for each number of hidden states based on the discriminative power of the KL divergences against the training set.
