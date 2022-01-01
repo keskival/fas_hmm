@@ -131,13 +131,13 @@ for number_of_hidden_states in range(1, NUMBER_OF_HIDDEN_STATES):
     log_probabilities_positive_for_positive = correct_log_probs
     log_probabilities_positive_for_negative = faulty_log_probs
 
-    y_true = np.concatenate([np.zeros_like(correct_distribution_differences), np.ones_like(log_probabilities_positive_for_negative)])
-    y_pred = np.concatenate([correct_distribution_differences, log_probabilities_positive_for_negative])
-    roc_auc_score = sklearn.metrics.roc_auc_score(y_true, y_pred)
-
-    y_true = np.concatenate([np.ones_like(log_probabilities_positive_for_positive), np.zeros_like(erroneous_distribution_differences)])
+    y_true = np.concatenate([np.ones_like(log_probabilities_positive_for_positive), np.zeros_like(log_probabilities_positive_for_negative)])
     y_pred = np.concatenate([log_probabilities_positive_for_positive, log_probabilities_positive_for_negative])
     roc_auc_score_direct = sklearn.metrics.roc_auc_score(y_true, y_pred)
+
+    y_true = np.concatenate([np.zeros_like(correct_distribution_differences), np.ones_like(erroneous_distribution_differences)])
+    y_pred = np.concatenate([correct_distribution_differences, erroneous_distribution_differences])
+    roc_auc_score = sklearn.metrics.roc_auc_score(y_true, y_pred)
 
     print(f"Number of hidden states: {number_of_hidden_states}, Correct log prob min,mean,max: {correct_log_prob}, faulty log prob min,mean,max: {faulty_log_prob}, correct hidden state distribution diffs: {correct_distribution_diff}, faulty hidden state distribution diffs: {faulty_distribution_diff}")
     print(f"ROC AUC score direct: {roc_auc_score_direct}, ROC AUC score: {roc_auc_score}")
