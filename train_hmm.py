@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 
 NUMBER_OF_RUNS = 100000
 TRAINING_SET = 90000
-NUMBER_OF_HIDDEN_STATES = 32 #64
+NUMBER_OF_HIDDEN_STATES = 64
 NUMBER_OF_TRAINING_SEQUENCES = 1000
 NUMBER_OF_VALIDATION_SEQUENCES = 1000
-SEQUENCE_LENGTH = 100
+SEQUENCE_LENGTH = int(os.environ.get("SEQUENCE_LENGTH", 100))
 
 def transform(sequences):
     lengths = [[SEQUENCE_LENGTH] * (r.shape[0] // SEQUENCE_LENGTH) + [r.shape[0] - (r.shape[0] // SEQUENCE_LENGTH) * SEQUENCE_LENGTH] for r in sequences]
