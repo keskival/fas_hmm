@@ -1,0 +1,97 @@
+
+\documentclass[journal]{IEEEtran}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage[cmex10]{amsmath}
+\interdisplaylinepenalty=2500
+\usepackage{algorithmic}
+\usepackage{array}
+\usepackage{url}
+\usepackage{mathtools}
+\hyphenation{op-tical net-works semi-conduc-tor method methods}
+\usepackage{float}
+
+
+\ifCLASSOPTIONcompsoc
+  \usepackage[caption=false,font=normalsize,labelfont=sf,textfont=sf]{subfig}
+\else
+  \usepackage[caption=false,font=footnotesize]{subfig}
+\fi
+
+\ifCLASSINFOpdf
+  \usepackage[pdftex]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../pdf/}{../jpeg/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  \DeclareGraphicsExtensions{.pdf,.jpeg,.jpg,.png}
+\else
+  % or other class option (dvipsone, dvipdf, if not using dvips). graphicx
+  % will default to the driver specified in the system graphics.cfg if no
+  % driver is specified.
+  \usepackage[dvips]{graphicx}
+  % declare the path(s) where your graphic files are
+  % \graphicspath{{../eps/}}
+  % and their extensions so you won't have to specify these with
+  % every instance of \includegraphics
+  \DeclareGraphicsExtensions{.eps}
+\fi
+
+\floatstyle{ruled}
+\newfloat{json}{thp}{lop}
+\floatname{program}{Program}
+
+%opening
+\title{Hidden Markov Model Baseline for Flexible Assembly System Anomaly Detection - DRAFT}
+\author{Tero Keski-Valkama}
+
+\begin{document}
+
+\maketitle
+Version: \today
+
+\begin{abstract}
+
+\end{abstract}
+
+\begin{IEEEkeywords}
+\end{IEEEkeywords}
+
+\section{Introduction}
+
+Flexible Assembly Systems (FAS) and Flexible Manufacturing Systems (FMS) represent an evolution from specialized mass manufacturing systems. They allow flexibility in manufacturing which enables efficient production of smaller production runs and customization, personalization and quick evolution of manufactured products.
+
+Flexibility brings challenges as it makes fault detection harder, especially in systemic conditions. Even if each separate module of a flexible assembly plant was nominally operating well, there are systemic fault modes and degradations which can cause non-optimal performance of the whole. Novel production plans deployed to the manufacturing system evokes new behaviours and possible problems. As flexible manufacturing generally requires more open integration to external systems for planning and controlling production dynamically, it becomes more susceptible to cyberattacks.
+
+Many of these fault conditions and degradations are such that they cannot be trivially known in advance. Industrial anomaly detection systems are used to detect novel anomalous conditions which might denote faults, degradations or for example cyberattacks. Traditional process mining methods are not well suitable for environments with heterogeneous industrial IoT systems creating logs where process trace events might not be fully correlated with the process ids. These uncorrelated process traces or logs are therefore interlaced so that events are in sequence but originating from separate processes. In general case, automatic process identification might not be even possible in an explicit form.
+
+Machine learning approaches can provide automatic learning of industrial process nominal operation, and those can be used to flag anomalous situations. Machine learning systems require data to train on, and industrial process data is guarded trade secret especially in relation to fault conditions. Real data on manufacturing process faults is nontrivial to get in sufficient amounts and on system level. Hence, simulations for synthetic flexible assembly process are required. In this research, FAS Simulator is used as the data source \cite{keski2017simulator}.
+
+To compare different machine learning approaches, baselines are needed. We are interested in anomaly detection solutions for uncorrelated process traces, or sequential, interlaced event logs. Existing methods for these include Hidden Markov Model based approaches \cite{gornitz2015hidden}\cite{joshi2005investigating}, denoising autoencoder based approaches \cite{nolle2016unsupervised}, LSTM based approaches \cite{yuan2021recompose}\cite{du2017deeplog}, or even more complex deep neural networks \cite{zhang2019robust}. Some of the traditional approaches such as Alpha algorithm from process mining require correlated process traces, where each event is tagged with the process instance it belongs to, effectively deinterlacing the event logs.
+
+Here we present results of applying Hidden Markov Models on FAS Simulator datasets to produce a baseline benchmark for this challenge to compare more sophisticated approaches against.
+
+\section{Setup}
+
+We generated challenge data using FAS Simulator project\cite{FASSimulator}. The challenge dataset consists of 10,000 runs of healthy flexible assembly system and 10,000 runs of a flexible assembly system under a randomly picked degrading condition. Each run consists of assembling 30 items, slightly over 1,000 events logged each.
+
+The data is divided into training set of the first 90,000 healthy runs, and the validation set of the final 10,000 healthy runs and all the 100,000 degraded runs. For training, 1,000 runs are picked from the training set randomly, and for validation 1,000 runs are picked from the validation set randomly.
+
+64 Hidden Markov Models are trained with different numbers of hidden states from 1 to 64. Different lengths of windows are used to train and evaluate the model, with window sequence lengths of 10, 100, 1,000 and full runs.
+
+These models are used to score the overall likelihood of the observed sequence window assuming the trained model for the validation set sample sequences. In practice we find that the model tends to score sample sequences from the degraded runs higher in likelihood than from the healthy runs. This is likely due to the fact that HMM is unable to perfectly model the causal relationships in the process traces, and that degraded sequences tend to have a higher frequency of ``TICK'' events in the traces designating the passing of time. As ``TICK'' events are the most common event type in the training set as well, their respective probability is very high compared to other event types. This makes the HMM score degraded logs higher than healthy logs.
+
+Other research using HMMs for anomaly detection has also found that naive scoring of the sequences doesn't work well for this purpose\cite{gornitz2015hidden}. Instead, they tend to suggest looking at the HMM hidden state sequences and differences of those to the healthy hidden state sequences.
+
+In our case, the event ids are static across sequences, and the trained HMM model is static as well, so we can simply compare the hidden state sequences directly without the added complication of equivalence or similarity of different Hidden Markov Models. We simply compute histograms of hidden states in the observed window for the trained HMM, and compare the histograms to the histograms of the training set using KL divergence.
+
+\appendices
+
+\bibliographystyle{IEEEtran}
+\bibliography{results}
+
+\begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{tero}}]{Tero Keski-Valkama}
+Tero Keski-Valkama is working as a lead ML \& AI engineer in HERE Switzerland GmbH. He has been programming neural networks since high school in 1990s.
+\end{IEEEbiography}
+
+\end{document}
