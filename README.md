@@ -15,3 +15,7 @@ This produces outputs to the standard output giving minimums, means and maximums
 KL divergences are computed for the distributions of hidden states for faultless runs and the anomalous runs against training set distribution.
 
 In the end ROC values are graphed for each number of hidden states based on the discriminative power of the KL divergences against the training set.
+
+## Results
+
+See the results in: [Results](https://github.com/keskival/fas_hmm/blob/main/results/results.pdf).
