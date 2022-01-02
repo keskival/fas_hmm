@@ -79,7 +79,21 @@ The data is divided into training set of the first 90,000 healthy runs, and the 
 
 64 Hidden Markov Models are trained with different numbers of hidden states from 1 to 64. Different lengths of windows are used to train and evaluate the model, with window sequence lengths of 10, 100, 1,000 and full runs.
 
-These models are used to score the overall likelihood of the observed sequence window assuming the trained model for the validation set sample sequences. In practice we find that the model tends to score sample sequences from the degraded runs higher in likelihood than from the healthy runs. This is likely due to the fact that HMM is unable to perfectly model the causal relationships in the process traces, and that degraded sequences tend to have a higher frequency of ``TICK'' events in the traces designating the passing of time. As ``TICK'' events are the most common event type in the training set as well, their respective probability is very high compared to other event types. This makes the HMM score degraded logs higher than healthy logs.
+These models are used to score the overall likelihood of the observed sequence window assuming the trained model for the validation set sample sequences. In practice we find that the model tends to score sample sequences from the degraded runs higher in likelihood than from the healthy runs. This is likely due to the fact that HMM is unable to perfectly model the causal relationships in the process traces, and that degraded sequences tend to have a higher frequency of ``TICK'' events (Figure \ref{figure:degraded_histogram}) in the traces designating the passing of time than in healthy sequences (Figure \ref{figure:healthy_histogram}). As ``TICK'' events are the most common event type in the training set as well, their respective probability is very high compared to other event types. This makes the HMM score healthy logs  lower than degraded logs.
+
+\begin{figure}[tb]
+ \centering
+ \includegraphics[width=8 cm,keepaspectratio=true]{./healthy_runs_data_histogram.eps}
+ \caption{Frequencies of events in healthy runs. The event id zero corresponds to the TICK event.}
+ \label{figure:healthy_histogram}
+\end{figure}
+
+\begin{figure}[tb]
+ \centering
+ \includegraphics[width=8 cm,keepaspectratio=true]{./degraded_runs_data_histogram.eps}
+ \caption{Frequencies of events in degraded runs. The event id zero corresponds to the TICK event.}
+ \label{figure:degraded_histogram}
+\end{figure}
 
 Other research using HMMs for anomaly detection has also found that naive scoring of the sequences doesn't work well for this purpose\cite{gornitz2015hidden}. Instead, they tend to suggest looking at the HMM hidden state sequences and differences of those to the healthy hidden state sequences.
 
