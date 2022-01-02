@@ -208,7 +208,7 @@ plt.figure(figsize=(15,8))
 g = sns.barplot(x=hidden_states_sequence, y=scores)
 g.set_xlabel("Number of hidden states")
 g.set_ylabel("Receiver Operating Characteristic")
-g.set_title(f"ROC metric for hidden state distribution KL divergence, {SEQUENCE_LABEL}")
+g.set_title(f"ROC AUC metric for hidden state distribution KL divergence, {SEQUENCE_LABEL}")
 g.get_figure().savefig(f"results/roc_kl_score_{SEQUENCE_LENGTH}.eps")
 plt.show()
 
@@ -216,8 +216,20 @@ plt.figure(figsize=(15,8))
 g = sns.barplot(x=hidden_states_sequence, y=direct_scores)
 g.set_xlabel("Number of hidden states")
 g.set_ylabel("Receiver Operating Characteristic")
-g.set_title(f"ROC metric for HMM likelihood, {SEQUENCE_LABEL}")
+g.set_title(f"ROC AUC metric for HMM likelihood, {SEQUENCE_LABEL}")
 g.get_figure().savefig(f"results/roc_hmm_score_{SEQUENCE_LENGTH}.eps")
+plt.show()
+
+worst_score_for_a_healthy_validation_run = [np.max(c) for c in all_likelihoods_hmm_hidden_kl_healthy]
+number_of_degraded_samples_correctly_detected = [np.sum(e > w) for e, w in zip(all_likelihoods_hmm_hidden_kl_degraded, worst_score_for_a_healthy_validation_run)]
+fraction_of_degraded_samples_correctly_detected = [n / e.shape[0] for n, e in zip(number_of_degraded_samples_correctly_detected, all_likelihoods_hmm_hidden_kl_degraded)]
+
+plt.figure(figsize=(15,8))
+g = sns.barplot(x=hidden_states_sequence, y=fraction_of_degraded_samples_correctly_detected)
+g.set_xlabel("Number of hidden states")
+g.set_ylabel("Fraction of degraded samples detected for no false positives")
+g.set_title(f"Accuracy, {SEQUENCE_LABEL}")
+g.get_figure().savefig(f"results/accuracy_{SEQUENCE_LENGTH}.eps")
 plt.show()
 
 all_log_likelihoods_hmm_likelihood_healthy = np.asarray(all_log_likelihoods_hmm_likelihood_healthy[5]).flatten()

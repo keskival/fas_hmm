@@ -256,6 +256,16 @@ Doing the same for KL divergences (0 means perfect distributional match of the o
 
 When we graph the ROC AUC scores based on these KL divergences across all the different numbers of hidden states (Figure \ref{figure:roc_kl_100}), we notice that the number of hidden states doesn't seem to have a great effect here either as long as there are at least 3 hidden states.
 
+The discrimination rate for the model when the cut-off score is set to the maximal divergence for the healthy samples, that is, for no false positives is 6\%, at most 8\% (Figure \ref{figure:discrimination_rate_100}).
+
+\begin{figure}[tb]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./accuracy_100.eps}
+ \caption{KL divergence score based correct discrimination fraction for degraded samples for no false positives with a sequence length of 100.}
+ \label{figure:discrimination_rate_100}
+\end{figure}
+
+
 \appendices
 
 \bibliographystyle{IEEEtran}
