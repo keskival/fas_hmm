@@ -191,7 +191,7 @@ print(f"scores={scores}")
 SEQUENCE_LABEL = f"sequence length: {SEQUENCE_LENGTH}" if not FULL_SEQUENCES else "full sequence"
 
 plt.figure(figsize=(15,8))
-g = sns.barplot(x=hidden_states_sequence, y=direct_scores)
+g = sns.barplot(x=hidden_states_sequence, y=scores)
 g.set_xlabel("Number of hidden states")
 g.set_ylabel("Receiver Operating Characteristic")
 g.set_title(f"ROC metric for hidden state distribution KL divergence, {SEQUENCE_LABEL}")
@@ -199,7 +199,7 @@ g.get_figure().savefig(f"results/roc_kl_score_{SEQUENCE_LENGTH}.eps")
 plt.show()
 
 plt.figure(figsize=(15,8))
-g = sns.barplot(x=hidden_states_sequence, y=scores)
+g = sns.barplot(x=hidden_states_sequence, y=direct_scores)
 g.set_xlabel("Number of hidden states")
 g.set_ylabel("Receiver Operating Characteristic")
 g.set_title(f"ROC metric for HMM likelihood, {SEQUENCE_LABEL}")
