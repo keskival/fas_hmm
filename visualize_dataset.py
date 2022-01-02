@@ -7,7 +7,7 @@ import seaborn
 
 
 NUMBER_OF_RUNS = 100000
-NUMBER_OF_EVENT_IDS = 47
+NUMBER_OF_EVENT_IDS = 46
 
 def get_all_sequences_histograms(correct=True):
     histogram = [0 for _ in range(NUMBER_OF_EVENT_IDS)]
