@@ -228,7 +228,7 @@ Plotting simple HMM log likelihood score histograms for different log likelihood
 
 This is likely due to the fact that HMM is unable to perfectly model the causal relationships in the process traces, and that degraded sequences tend to have a higher frequency of ``TICK'' events (Figure \ref{figure:degraded_histogram}) in the traces designating the passing of time than in healthy sequences (Figure \ref{figure:healthy_histogram}). As ``TICK'' events are the most common event type in the training set as well, their respective probability is very high compared to other event types. This makes the HMM score healthy logs  lower than degraded logs.
 
-When we graph the ROC scores based on these log likelihoods across all the different numbers of hidden states (Figure \ref{figure:log_likelihoods_100}) we notice that the values are less than 0.5 when the full sequence is not used. This means that this model has negative predictiveness and we would do better if we inverted the predictions of the model to swap prediction to healthy when the model predicts degraded, and vice versa. However, it is not likely that this swap will generalize well to new fault types, so we will need to predict anomalous divergences differently.
+When we graph the ROC scores based on these log likelihoods across all the different numbers of hidden states (Figure \ref{figure:roc_log_likelihoods_100}) we notice that the values are less than 0.5 when the full sequence is not used. This means that this model has negative predictiveness and we would do better if we inverted the predictions of the model to swap prediction to healthy when the model predicts degraded, and vice versa. However, it is not likely that this swap will generalize well to new fault types, so we will need to predict anomalous divergences differently.
 
 We also notice that the number of hidden states doesn't seem to have a great effect.
 
@@ -254,7 +254,7 @@ In our case, the event ids are static across sequences, and the trained HMM mode
 
 Doing the same for KL divergences (0 means perfect distributional match of the observed HMM hidden state distribution to the training data hidden state distribution, and larger values denote worse match) shows that some of the degraded runs do indeed have worse KL divergences than the KL divergences for the healthy runs. See Figure \ref{figure:kl_100}.
 
-We also notice that the number of hidden states doesn't seem to have a great effect here either.
+When we graph the ROC scores based on these KL divergences across all the different numbers of hidden states (Figure \ref{figure:roc_kl_100}), we notice that the number of hidden states doesn't seem to have a great effect here either as long as there are at least 3 hidden states.
 
 \appendices
 
