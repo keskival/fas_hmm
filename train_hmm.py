@@ -24,10 +24,11 @@ def transform(sequences):
     if FULL_SEQUENCES:
         lengths = [len(r) for r in sequences]
     else:
-        lengths = [[SEQUENCE_LENGTH] * (r.shape[0] // SEQUENCE_LENGTH) + [r.shape[0] - (r.shape[0] // SEQUENCE_LENGTH) * SEQUENCE_LENGTH] for r in sequences]
-        lengths = functools.reduce(lambda a, b: a + b, lengths, [])
-        lengths = [l for l in lengths if l > 0]
-    return np.concatenate(sequences, axis=0), lengths
+        target_length = (r.shape[0] // SEQUENCE_LENGTH) * SEQUENCE_LENGTH
+        offsets = [np.randint(0, r.shape[0] - target_length) for r in sequences]
+        clipped_runs = [r[offset:offset + target_length] for r, offset in zip(sequences, offsets)]
+        lengths = [target_length for r in clipped_runs]
+    return np.concatenate(clipped_runs, axis=0), lengths
 
 def get_n_sequences(n, correct=True, validation=False):
     runs = []
@@ -210,6 +211,14 @@ all_log_likelihoods_hmm_likelihood_healthy = np.asarray(all_log_likelihoods_hmm_
 all_log_likelihoods_hmm_likelihood_degraded = np.asarray(all_log_likelihoods_hmm_likelihood_degraded).flatten()
 all_likelihoods_hmm_hidden_kl_healthy = np.asarray(all_likelihoods_hmm_hidden_kl_healthy).flatten()
 all_likelihoods_hmm_hidden_kl_degraded = np.asarray(all_likelihoods_hmm_hidden_kl_degraded).flatten()
+
+worst_score_for_a_healthy_validation_run = np.max(all_likelihoods_hmm_hidden_kl_healthy)
+number_of_degraded_samples_correctly_detected = np.sum(all_likelihoods_hmm_hidden_kl_degraded > worst_score_for_a_healthy_validation_run)
+fraction_of_degraded_samples_correctly_detected = number_of_degraded_samples_correctly_detected / all_likelihoods_hmm_hidden_kl_degraded.shape[0]
+
+print(f"The worst score for a healthy validation sample: {worst_score_for_a_healthy_validation_run}")
+print(f"Number of degraded validation samples correctly detected: {number_of_degraded_samples_correctly_detected}")
+print(f"Fraction of degraded validation samples correctly detected: {fraction_of_degraded_samples_correctly_detected}")
 
 df = pd.concat(axis=0, ignore_index=True, objs=[
     pd.DataFrame.from_dict({'value': all_log_likelihoods_hmm_likelihood_healthy, 'name': 'Healthy'}),
