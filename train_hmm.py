@@ -24,10 +24,10 @@ def transform(sequences):
     if FULL_SEQUENCES:
         lengths = [len(r) for r in sequences]
     else:
-        target_length = (r.shape[0] // SEQUENCE_LENGTH) * SEQUENCE_LENGTH
-        offsets = [np.randint(0, r.shape[0] - target_length) for r in sequences]
-        clipped_runs = [r[offset:offset + target_length] for r, offset in zip(sequences, offsets)]
-        lengths = [target_length for r in clipped_runs]
+        target_lengths = [(r.shape[0] // SEQUENCE_LENGTH) * SEQUENCE_LENGTH for r in sequences]
+        offsets = [np.random.randint(0, r.shape[0] - target_length) for r, target_length in zip(sequences, target_lengths)]
+        clipped_runs = [r[offset:offset + target_length] for r, offset, target_length in zip(sequences, offsets, target_lengths)]
+        lengths = [[SEQUENCE_LENGTH] * (len(r) // SEQUENCE_LENGTH) for r in clipped_runs]
     return np.concatenate(clipped_runs, axis=0), lengths
 
 def get_n_sequences(n, correct=True, validation=False):
@@ -161,11 +161,6 @@ else:
         log_probabilities_positive_for_positive = correct_log_probs
         log_probabilities_positive_for_negative = faulty_log_probs
 
-        all_log_likelihoods_hmm_likelihood_healthy.append(correct_log_probs)
-        all_log_likelihoods_hmm_likelihood_degraded.append(faulty_log_probs)
-        all_likelihoods_hmm_hidden_kl_healthy.append(correct_distribution_differences)
-        all_likelihoods_hmm_hidden_kl_degraded.append(erroneous_distribution_differences)
-
         y_true = np.concatenate([np.ones_like(log_probabilities_positive_for_positive), np.zeros_like(log_probabilities_positive_for_negative)])
         y_pred = np.concatenate([log_probabilities_positive_for_positive, log_probabilities_positive_for_negative])
         roc_auc_score_direct = sklearn.metrics.roc_auc_score(y_true, y_pred)
@@ -179,6 +174,24 @@ else:
         hidden_states_sequence.append(number_of_hidden_states)
         direct_scores.append(roc_auc_score_direct)
         scores.append(roc_auc_score)
+
+        correct_log_probs = np.asarray(correct_log_probs).flatten()
+        faulty_log_probs = np.asarray(faulty_log_probs).flatten()
+        correct_distribution_differences = np.asarray(correct_distribution_differences).flatten()
+        erroneous_distribution_differences = np.asarray(erroneous_distribution_differences).flatten()
+
+        all_log_likelihoods_hmm_likelihood_healthy.append(correct_log_probs)
+        all_log_likelihoods_hmm_likelihood_degraded.append(faulty_log_probs)
+        all_likelihoods_hmm_hidden_kl_healthy.append(correct_distribution_differences)
+        all_likelihoods_hmm_hidden_kl_degraded.append(erroneous_distribution_differences)
+
+        worst_score_for_a_healthy_validation_run = np.max(correct_distribution_differences)
+        number_of_degraded_samples_correctly_detected = np.sum(erroneous_distribution_differences > worst_score_for_a_healthy_validation_run)
+        fraction_of_degraded_samples_correctly_detected = number_of_degraded_samples_correctly_detected / erroneous_distribution_differences.shape[0]
+
+        print(f"The worst score for a healthy validation sample: {worst_score_for_a_healthy_validation_run}")
+        print(f"Number of degraded validation samples correctly detected: {number_of_degraded_samples_correctly_detected}")
+        print(f"Fraction of degraded validation samples correctly detected: {fraction_of_degraded_samples_correctly_detected}")
 
     with open(evaluation_results_filename, "wb") as file:
         pickle.dump([hidden_states_sequence, direct_scores, scores,
@@ -207,18 +220,10 @@ g.set_title(f"ROC metric for HMM likelihood, {SEQUENCE_LABEL}")
 g.get_figure().savefig(f"results/roc_hmm_score_{SEQUENCE_LENGTH}.eps")
 plt.show()
 
-all_log_likelihoods_hmm_likelihood_healthy = np.asarray(all_log_likelihoods_hmm_likelihood_healthy).flatten()
-all_log_likelihoods_hmm_likelihood_degraded = np.asarray(all_log_likelihoods_hmm_likelihood_degraded).flatten()
-all_likelihoods_hmm_hidden_kl_healthy = np.asarray(all_likelihoods_hmm_hidden_kl_healthy).flatten()
-all_likelihoods_hmm_hidden_kl_degraded = np.asarray(all_likelihoods_hmm_hidden_kl_degraded).flatten()
-
-worst_score_for_a_healthy_validation_run = np.max(all_likelihoods_hmm_hidden_kl_healthy)
-number_of_degraded_samples_correctly_detected = np.sum(all_likelihoods_hmm_hidden_kl_degraded > worst_score_for_a_healthy_validation_run)
-fraction_of_degraded_samples_correctly_detected = number_of_degraded_samples_correctly_detected / all_likelihoods_hmm_hidden_kl_degraded.shape[0]
-
-print(f"The worst score for a healthy validation sample: {worst_score_for_a_healthy_validation_run}")
-print(f"Number of degraded validation samples correctly detected: {number_of_degraded_samples_correctly_detected}")
-print(f"Fraction of degraded validation samples correctly detected: {fraction_of_degraded_samples_correctly_detected}")
+all_log_likelihoods_hmm_likelihood_healthy = np.asarray(all_log_likelihoods_hmm_likelihood_healthy[5]).flatten()
+all_log_likelihoods_hmm_likelihood_degraded = np.asarray(all_log_likelihoods_hmm_likelihood_degraded[5]).flatten()
+all_likelihoods_hmm_hidden_kl_healthy = np.asarray(all_likelihoods_hmm_hidden_kl_healthy[5]).flatten()
+all_likelihoods_hmm_hidden_kl_degraded = np.asarray(all_likelihoods_hmm_hidden_kl_degraded[5]).flatten()
 
 df = pd.concat(axis=0, ignore_index=True, objs=[
     pd.DataFrame.from_dict({'value': all_log_likelihoods_hmm_likelihood_healthy, 'name': 'Healthy'}),
