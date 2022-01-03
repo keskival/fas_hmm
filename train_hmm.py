@@ -13,7 +13,7 @@ import pandas as pd
 
 NUMBER_OF_RUNS = 100000
 TRAINING_SET = 90000
-NUMBER_OF_HIDDEN_STATES = 43 # 64
+NUMBER_OF_HIDDEN_STATES = 50 # 64
 NUMBER_OF_TRAINING_SEQUENCES = 1000
 NUMBER_OF_VALIDATION_SEQUENCES = 1000
 SEQUENCE_LENGTH = int(os.environ.get("SEQUENCE_LENGTH", 100))
@@ -25,9 +25,10 @@ def transform(sequences):
         lengths = [len(r) for r in sequences]
     else:
         target_lengths = [(r.shape[0] // SEQUENCE_LENGTH) * SEQUENCE_LENGTH for r in sequences]
-        offsets = [np.random.randint(0, r.shape[0] - target_length) for r, target_length in zip(sequences, target_lengths)]
+        offsets = [np.random.randint(0, r.shape[0] - target_length + 1) for r, target_length in zip(sequences, target_lengths)]
         clipped_runs = [r[offset:offset + target_length] for r, offset, target_length in zip(sequences, offsets, target_lengths)]
         lengths = [[SEQUENCE_LENGTH] * (len(r) // SEQUENCE_LENGTH) for r in clipped_runs]
+        lengths = functools.reduce(lambda a, b: a + b, lengths, [])
     return np.concatenate(clipped_runs, axis=0), lengths
 
 def get_n_sequences(n, correct=True, validation=False):
