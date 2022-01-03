@@ -240,6 +240,20 @@ In our case, the event ids are static across sequences, and the trained HMM mode
 
 \begin{figure}[tb]
  \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./kl_histograms_10.eps}
+ \caption{Counts of different HMM hidden state KL divergences for both healthy and degraded runs, sequence length 10 and 6 hidden states.}
+ \label{figure:kl_10}
+\end{figure}
+
+\begin{figure}[tb]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./roc_kl_score_10.eps}
+ \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM hidden state KL divergence scores with a sequence length of 10.}
+ \label{figure:roc_kl_10}
+\end{figure}
+
+\begin{figure}[tb]
+ \centering
  \includegraphics[width=10cm,keepaspectratio=true]{./kl_histograms_100.eps}
  \caption{Counts of different HMM hidden state KL divergences for both healthy and degraded runs, sequence length 100 and 6 hidden states.}
  \label{figure:kl_100}
@@ -252,11 +266,32 @@ In our case, the event ids are static across sequences, and the trained HMM mode
  \label{figure:roc_kl_100}
 \end{figure}
 
+\begin{figure}[tb]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./kl_histograms_1000.eps}
+ \caption{Counts of different HMM hidden state KL divergences for both healthy and degraded runs, sequence length 1000 and 6 hidden states.}
+ \label{figure:kl_1000}
+\end{figure}
+
+\begin{figure}[tb]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./roc_kl_score_1000.eps}
+ \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM hidden state KL divergence scores with a sequence length of 1000.}
+ \label{figure:roc_kl_1000}
+\end{figure}
+
 Doing the same for KL divergences (0 means perfect distributional match of the observed HMM hidden state distribution to the training data hidden state distribution, and larger values denote worse match) shows that some of the degraded runs do indeed have worse KL divergences than the KL divergences for the healthy runs. See Figure \ref{figure:kl_100}.
 
 When we graph the ROC AUC scores based on these KL divergences across all the different numbers of hidden states (Figure \ref{figure:roc_kl_100}), we notice that the number of hidden states doesn't seem to have a great effect here either as long as there are at least 3 hidden states.
 
-The discrimination rate for the model when the cut-off score is set to the maximal divergence for the healthy samples, that is, for no false positives, is 6\% and at most 8\% (Figure \ref{figure:discrimination_rate_100}).
+The discrimination rate for the model when the cut-off score is set to the maximal divergence for the healthy samples, that is, for no false positives, is about 1\% and at most 5\% for sequence length of 10 (Figure \ref{figure:discrimination_rate_10}). It is about 6\% and at most 8\% for the sequence length of 100 (Figure \ref{figure:discrimination_rate_100}), and about 8\% and at most 12\% for the sequence length of 1000 (Figure \ref{figure:discrimination_rate_1000}).
+
+\begin{figure}[tb]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./accuracy_10.eps}
+ \caption{KL divergence score based correct discrimination fraction for degraded samples for no false positives with a sequence length of 100.}
+ \label{figure:discrimination_rate_10}
+\end{figure}
 
 \begin{figure}[tb]
  \centering
@@ -265,6 +300,12 @@ The discrimination rate for the model when the cut-off score is set to the maxim
  \label{figure:discrimination_rate_100}
 \end{figure}
 
+\begin{figure}[tb]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./accuracy_1000.eps}
+ \caption{KL divergence score based correct discrimination fraction for degraded samples for no false positives with a sequence length of 100.}
+ \label{figure:discrimination_rate_1000}
+\end{figure}
 
 \appendices
 
