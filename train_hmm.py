@@ -15,7 +15,7 @@ NUMBER_OF_RUNS = 100000
 TRAINING_SET = 90000
 NUMBER_OF_HIDDEN_STATES = 65
 NUMBER_OF_TRAINING_SEQUENCES = 1000
-NUMBER_OF_VALIDATION_SEQUENCES = 1000
+NUMBER_OF_VALIDATION_SEQUENCES = 10000
 SEQUENCE_LENGTH = int(os.environ.get("SEQUENCE_LENGTH", 100))
 FULL_SEQUENCES = SEQUENCE_LENGTH == -1
 
@@ -248,9 +248,9 @@ g = sns.histplot(
     data=df, x='value', hue='name', multiple='dodge', bins=100
 )
 
-g.set_xlabel("HMM Likelihood")
+g.set_xlabel("HMM Log-likelihood")
 g.set_ylabel("Count")
-g.set_title(f"Likelihoods of sequences, {SEQUENCE_LABEL}")
+g.set_title(f"Log-likelihoods of sequences, {SEQUENCE_LABEL}")
 g.get_figure().savefig(f"results/hmm_histograms_{SEQUENCE_LENGTH}.eps")
 plt.show()
 
