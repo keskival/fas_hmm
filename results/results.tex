@@ -65,13 +65,6 @@ Flexibility brings challenges as it makes fault detection harder, especially in 
 
 Many of these fault conditions and degradations are such that they cannot be trivially known in advance. Industrial anomaly detection systems are used to detect novel anomalous conditions which might denote faults, degradations or for example cyberattacks. Traditional process mining methods are not well suitable for environments with heterogeneous industrial IoT systems creating logs where process trace events might not be fully correlated with the process ids. These uncorrelated process traces or logs are therefore interlaced so that events are in sequence but originating from separate processes. In general case, automatic process identification might not be even possible in an explicit form.
 
-\begin{figure}[b]
- \centering
- \includegraphics[width=8cm,keepaspectratio=true]{./healthy_runs_data_histogram.eps}
- \caption{Frequencies of events in healthy runs. The event id zero corresponds to the TICK event.}
- \label{figure:healthy_histogram}
-\end{figure}
-
 Machine learning approaches can provide automatic learning of industrial process nominal operation, and those can be used to flag anomalous situations. Machine learning systems require data to train on, and industrial process data is guarded trade secret especially in relation to fault conditions. Real data on manufacturing process faults is nontrivial to get in sufficient amounts and on system level. Hence, simulations for synthetic flexible assembly process are required. In this research, FAS Simulator is used as the data source \cite{keski2017simulator}.
 
 To compare different machine learning approaches, baselines are needed. We are interested in anomaly detection solutions for uncorrelated process traces, or sequential, interlaced event logs. Existing methods for these include Hidden Markov Model based approaches \cite{gornitz2015hidden}\cite{joshi2005investigating}, denoising autoencoder based approaches \cite{nolle2016unsupervised}, LSTM based approaches \cite{yuan2021recompose}\cite{du2017deeplog}, or even more complex deep neural networks \cite{zhang2019robust}. Some of the traditional approaches such as Alpha algorithm from process mining require correlated process traces, where each event is tagged with the process instance it belongs to, effectively deinterlacing the event logs.
@@ -79,13 +72,6 @@ To compare different machine learning approaches, baselines are needed. We are i
 Here we present results of applying Hidden Markov Models on FAS Simulator datasets to produce a baseline benchmark for this challenge to compare more sophisticated approaches against.
 
 \section{Setup}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=8cm,keepaspectratio=true]{./degraded_runs_data_histogram.eps}
- \caption{Frequencies of events in degraded runs. The event id zero corresponds to the TICK event.}
- \label{figure:degraded_histogram}
-\end{figure}
 
 We generated challenge data using FAS Simulator project\cite{FASSimulator}. The challenge dataset consists of 10,000 runs of healthy flexible assembly system and 10,000 runs of a flexible assembly system under a randomly picked degrading condition. Each run consists of assembling 30 items, slightly over 1,000 events logged each.
 
@@ -201,51 +187,23 @@ Event id & Event name \\
 \end{tabular}
 \end{table}
 
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./hmm_histograms_10.eps}
- \caption{Counts of different HMM log likelihood scores for both healthy and degraded runs, sequence length 10 and 6 hidden states.}
- \label{figure:log_likelihood_10}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./roc_hmm_score_10.eps}
- \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM log likelihood scores with a sequence length of 10.}
- \label{figure:roc_log_likelihoods_10}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./hmm_histograms_100.eps}
- \caption{Counts of different HMM log likelihood scores for both healthy and degraded runs, sequence length 100 and 6 hidden states.}
- \label{figure:log_likelihood_100}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./roc_hmm_score_100.eps}
- \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM log likelihood scores with a sequence length of 100.}
- \label{figure:roc_log_likelihoods_100}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./hmm_histograms_1000.eps}
- \caption{Counts of different HMM log likelihood scores for both healthy and degraded runs, sequence length 1000 and 6 hidden states.}
- \label{figure:log_likelihood_1000}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./roc_hmm_score_1000.eps}
- \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM log likelihood scores with a sequence length of 1000.}
- \label{figure:roc_log_likelihoods_1000}
-\end{figure}
-
 The trained HMM models are used to score the overall likelihood of the observed sequence window assuming the trained model for the validation set sample sequences.
 
 Plotting simple HMM log likelihood score histograms for different log likelihood values (higher log likelihood implies a higher likelihood the sequence was generated by an equivalent process to the trained HMM) shows that there is significant overlap for healthy and degraded runs, and that certain degraded runs seem to get higher log likelihood scores than healthy runs. See Figures \ref{figure:log_likelihood_10}, \ref{figure:log_likelihood_100} and \ref{figure:log_likelihood_1000}. This implies that certain degraded runs are a better match to the trained HMM than healthy runs in the validation set.
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=8cm,keepaspectratio=true]{./degraded_runs_data_histogram.eps}
+ \caption{Frequencies of events in degraded runs. The event id zero corresponds to the TICK event.}
+ \label{figure:degraded_histogram}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=8cm,keepaspectratio=true]{./healthy_runs_data_histogram.eps}
+ \caption{Frequencies of events in healthy runs. The event id zero corresponds to the TICK event.}
+ \label{figure:healthy_histogram}
+\end{figure}
 
 This is likely due to the fact that HMM is unable to perfectly model the causal relationships in the process traces, and that degraded sequences tend to have a higher frequency of ``TICK'' events (Figure \ref{figure:degraded_histogram}) in the traces designating the passing of time than in healthy sequences (Figure \ref{figure:healthy_histogram}). As ``TICK'' events are the most common event type in the training set as well, their respective probability is very high compared to other event types. This makes the HMM score healthy logs  lower than degraded logs.
 
@@ -259,76 +217,12 @@ Other research using HMMs for anomaly detection has found that naive scoring of 
 
 In our case, the event ids are static across sequences, and the trained HMM model is static as well, so we can simply compare the hidden state sequences directly without the added complication of equivalence or similarity of different Hidden Markov Models. We simply compute histograms of hidden states in the observed window for the trained HMM, and compare the histograms to the histograms of the training set using KL divergence.
 
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./kl_histograms_10.eps}
- \caption{Counts of different HMM hidden state KL divergences for both healthy and degraded runs, sequence length 10 and 6 hidden states.}
- \label{figure:kl_10}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./roc_kl_score_10.eps}
- \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM hidden state KL divergence scores with a sequence length of 10.}
- \label{figure:roc_kl_10}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./kl_histograms_100.eps}
- \caption{Counts of different HMM hidden state KL divergences for both healthy and degraded runs, sequence length 100 and 6 hidden states.}
- \label{figure:kl_100}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./roc_kl_score_100.eps}
- \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM hidden state KL divergence scores with a sequence length of 100.}
- \label{figure:roc_kl_100}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./kl_histograms_1000.eps}
- \caption{Counts of different HMM hidden state KL divergences for both healthy and degraded runs, sequence length 1000 and 6 hidden states.}
- \label{figure:kl_1000}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./roc_kl_score_1000.eps}
- \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM hidden state KL divergence scores with a sequence length of 1000.}
- \label{figure:roc_kl_1000}
-\end{figure}
-
 Doing the same for KL divergences (0 means perfect distributional match of the observed HMM hidden state distribution to the training data hidden state distribution, and larger values denote worse match) shows that some of the degraded runs do indeed have worse KL divergences than the KL divergences for the healthy runs. See Figures \ref{figure:kl_10}, \ref{figure:kl_100} and \ref{figure:kl_1000}.
 
 When we graph the ROC AUC scores based on these KL divergences across all the different numbers of hidden states (Figures \ref{figure:roc_kl_10}, \ref{figure:roc_kl_100} and \ref{figure:roc_kl_1000}), we notice that the number of hidden states doesn't seem to have a great effect here either as long as there are at least 2 hidden states.
 
 The discrimination rate for the model when the cut-off score is set to the maximal divergence for the healthy samples, that is, for no false positives, is about 1\% and at most 5\% for sequence length of 10 (Figure \ref{figure:discrimination_rate_10}). It is about 6\% and at most 9\% for the sequence length of 100 (Figure \ref{figure:discrimination_rate_100}), and about 8\% and at most 15\% for the sequence length of 1000 (Figure \ref{figure:discrimination_rate_1000}).
 
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./accuracy_10.eps}
- \caption{KL divergence score based correct discrimination fraction for degraded samples for no false positives with a sequence length of 100.}
- \label{figure:discrimination_rate_10}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./accuracy_100.eps}
- \caption{KL divergence score based correct discrimination fraction for degraded samples for no false positives with a sequence length of 100.}
- \label{figure:discrimination_rate_100}
-\end{figure}
-
-\begin{figure}[tb]
- \centering
- \includegraphics[width=10cm,keepaspectratio=true]{./accuracy_1000.eps}
- \caption{KL divergence score based correct discrimination fraction for degraded samples for no false positives with a sequence length of 100.}
- \label{figure:discrimination_rate_1000}
-\end{figure}
-
-\appendices
 
 \bibliographystyle{IEEEtran}
 \bibliography{results}
@@ -336,5 +230,115 @@ The discrimination rate for the model when the cut-off score is set to the maxim
 \begin{IEEEbiography}[{\includegraphics[width=1in,height=1.25in,clip,keepaspectratio]{tero}}]{Tero Keski-Valkama}
 Tero Keski-Valkama is working as a lead ML \& AI engineer in HERE Switzerland GmbH. He has been programming neural networks since high school in 1990s.
 \end{IEEEbiography}
+
+\appendices
+
+\section{Diagrams}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./hmm_histograms_10.eps}
+ \caption{Counts of different HMM log likelihood scores for both healthy and degraded runs, sequence length 10 and 6 hidden states.}
+ \label{figure:log_likelihood_10}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./hmm_histograms_100.eps}
+ \caption{Counts of different HMM log likelihood scores for both healthy and degraded runs, sequence length 100 and 6 hidden states.}
+ \label{figure:log_likelihood_100}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./hmm_histograms_1000.eps}
+ \caption{Counts of different HMM log likelihood scores for both healthy and degraded runs, sequence length 1000 and 6 hidden states.}
+ \label{figure:log_likelihood_1000}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./roc_hmm_score_10.eps}
+ \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM log likelihood scores with a sequence length of 10.}
+ \label{figure:roc_log_likelihoods_10}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./roc_hmm_score_100.eps}
+ \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM log likelihood scores with a sequence length of 100.}
+ \label{figure:roc_log_likelihoods_100}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./roc_hmm_score_1000.eps}
+ \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM log likelihood scores with a sequence length of 1000.}
+ \label{figure:roc_log_likelihoods_1000}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./kl_histograms_10.eps}
+ \caption{Counts of different HMM hidden state KL divergences for both healthy and degraded runs, sequence length 10 and 6 hidden states.}
+ \label{figure:kl_10}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./kl_histograms_100.eps}
+ \caption{Counts of different HMM hidden state KL divergences for both healthy and degraded runs, sequence length 100 and 6 hidden states.}
+ \label{figure:kl_100}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./kl_histograms_1000.eps}
+ \caption{Counts of different HMM hidden state KL divergences for both healthy and degraded runs, sequence length 1000 and 6 hidden states.}
+ \label{figure:kl_1000}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./roc_kl_score_10.eps}
+ \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM hidden state KL divergence scores with a sequence length of 10.}
+ \label{figure:roc_kl_10}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./roc_kl_score_100.eps}
+ \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM hidden state KL divergence scores with a sequence length of 100.}
+ \label{figure:roc_kl_100}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./roc_kl_score_1000.eps}
+ \caption{Receiver Operating Characteristic AUC scores for different numbers of hidden states used using HMM hidden state KL divergence scores with a sequence length of 1000.}
+ \label{figure:roc_kl_1000}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./accuracy_10.eps}
+ \caption{KL divergence score based correct discrimination fraction for degraded samples for no false positives with a sequence length of 10.}
+ \label{figure:discrimination_rate_10}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./accuracy_100.eps}
+ \caption{KL divergence score based correct discrimination fraction for degraded samples for no false positives with a sequence length of 100.}
+ \label{figure:discrimination_rate_100}
+\end{figure}
+
+\begin{figure}[h]
+ \centering
+ \includegraphics[width=10cm,keepaspectratio=true]{./accuracy_1000.eps}
+ \caption{KL divergence score based correct discrimination fraction for degraded samples for no false positives with a sequence length of 1000.}
+ \label{figure:discrimination_rate_1000}
+\end{figure}
+
 
 \end{document}
